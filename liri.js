@@ -1,6 +1,9 @@
 require("dotenv").config();
 var keys = require("./key.js");
 var axios = require("axios");
+var fs = require('fs');
+var Spotify = require("node-spotify-api");
+var spotify = new Spotify(keys.spotify)
 
 var command = process.argv[2];
 var query = process.argv.slice(3).join(" ");
@@ -25,14 +28,22 @@ function RunLiri(service, search) {
 // val === search === query
 function spotifySong(val) {
     console.log("Running Spotify " + val)
-
+    spotify.search({
+        type: 'track',
+        query: val
+    }, function (err, data) {
+        if (err) {
+            return console.log('Error occurred: ' + err);
+        }
+        console.log(data.tracks.items[0]);
+    });
 }
 // val === search === query
 function movieOMDB(val) {
     let queryUrl = "http://www.omdbapi.com/?t=" + val + "&y=&plot=short&apikey=trilogy";
 
     axios.get(queryUrl)
-        .then(function(response){
+        .then(function (response) {
             console.log(response.data)
         })
 }
@@ -48,6 +59,7 @@ function getConcert(val) {
         outputConcertInfo(response);
     })
 }
+
 function outputConcertInfo(apiResponse) {
     for (var i = 0; i < apiResponse.data.length; i++) {
         var location = apiResponse.data[i].venue.city + ", ";
@@ -64,111 +76,13 @@ function outputConcertInfo(apiResponse) {
 }
 
 function doWhatItSays() {
-    console.log("Running DoWhatItSays")
-
+    fs.readFile("./random.txt", "utf8", function(err, data){
+        if(err) throw err;
+        const dataArr = data.split(",")
+        for(var i = 0; i < dataArr.length; i++){
+            if(i % 2 === 0){
+                RunLiri(dataArr[i], dataArr[i + 1])
+            }
+        }
+    })
 }
-
-
-// switch (command) {
-//     case "concert-this":
-//         var apiURL = "https://rest.bandsintown.com/artists/" + query + "/events?app_id=codingbootcamp"
-//         axiosGet(apiURL);
-//         break;
-//     default:
-//         console.log("")
-// }
-
-// function axiosGet(url) {
-//     axios
-//         .get(url)
-//         .then(function (response) {
-//             displayEventInfo(response);
-//         });
-// }
-
-// function displayEventInfo(resp) {
-//     console.log(resp)
-// }
-
-
-
-// function shortDate(datetime) {
-//     var sDate = datetime
-//         .split("T", 1)
-//         .toString()
-//         .split("-");
-//     return sDate[1] + "/" + sDate[2] + "/" + sDate[0];
-// }
-// switch (command){
-// //bands in town
-//     case "concert-this":  
-//         searchForBandsInTown(searchTerm);
-//         break;
-// //spotify
-//     case "spotify-this-song":  
-//         spotifyThisSong(searchTerm);
-//         break;
-// // OMDB for movies
-
-//     case "movie-this":  
-//         movieThis(searchTerm);
-//         break;
-// //  read commands from a file and excute the commands above
-//     case "do-what-it-says":  
-//         doRandom();
-//     break;
-// }
-
-// 
-
-
-//   function searchForBandsInTown(artist) {
-// var queryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
-// axios.get(queryUrl).then(
-//     function(response) {
-//         if(response.data[0].venue !=  undefined) {
-//             console.log("Event Veunue: " + response.data[0].venue.name);
-//             console.log("Event Location: " + response.data[0].venue.city);
-//             var eventDateTime = moment(response.data[0].datetime);
-//             console.log("Event Date & Time: " + eventDateTime.format("dddd, MMMM Do YYYY"));
-//         }
-
-
-
-
-// function movieThis(movie) {
-//     axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&tomatoes=true&apikey=trilogy").then(
-//         function(response) {
-//             //console.log(response.data);
-//             if (response.data.Title != undefined) {
-//                 console.log("Title: " + response.data.Title);
-//                 console.log("Year: " + response.data.Year);
-//                 console.log("imdbRating:: " + response.data.imdbRating);
-//                 console.log("Title: " + response.data.Title);
-//                 console.log("Country:: " + response.data.Country);
-//                 console.log("Language:: " + response.data.Language);
-//                 console.log("Plot: " + response.data.Plot);
-//                 console.log("Actors: " + response.data.Actors);
-//                 console.log("RottenTomatoes: " + response.data.tomatoRating);
-//             } 
-//             else {
-//                 movieThis("Mr. Nobody");
-//             }
-//         }
-//         // if response is empty call the api again with the "default" movie 
-//     ).catch(function (error) {  
-//         console.log(error);
-//         console.log("No Results found. ");
-
-// });
-// }
-
-// function doRandom() {
-//     fs.readFile("random.txt", "utf8", function(error, data) {
-//         var dataArr = data.split(",");
-//         spotifyThisSong(dataArr[1])
-//         // If the code experiences any errors it will log the error to the console.
-//         if (error) {
-//           return console.log(error);
-//         }
-//     });
