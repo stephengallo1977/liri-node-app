@@ -4,6 +4,7 @@ var axios = require("axios");
 var fs = require('fs');
 var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify)
+var moment = require('moment')
 
 var command = process.argv[2];
 var query = process.argv.slice(3).join(" ");
@@ -55,8 +56,21 @@ function getConcert(val) {
     axios({
         method: "GET",
         url: query
-    }).then(function (response) {
-        outputConcertInfo(response);
+    }).then(function (apiResponse) {
+        for (var i = 0; i < apiResponse.data.length; i++) {
+            var location = apiResponse.data[i].venue.city + ", ";
+            location += apiResponse.data[i].venue.region;
+            location += " (" + apiResponse.data[i].venue.country + ")";
+            var showData = [
+                "Venue:\t\t" + apiResponse.data[i].venue.name,
+                "Location:\t" + location,
+                // format date with moment
+                "Date:\t\t" + apiResponse.data[i].datetime,
+                "==========================================="
+            ].join("\n");
+            console.log(showData);
+        }
+        // outputConcertInfo(response);
     })
 }
 
@@ -76,11 +90,11 @@ function outputConcertInfo(apiResponse) {
 }
 
 function doWhatItSays() {
-    fs.readFile("./random.txt", "utf8", function(err, data){
-        if(err) throw err;
+    fs.readFile("./random.txt", "utf8", function (err, data) {
+        if (err) throw err;
         const dataArr = data.split(",")
-        for(var i = 0; i < dataArr.length; i++){
-            if(i % 2 === 0){
+        for (var i = 0; i < dataArr.length; i++) {
+            if (i % 2 === 0) {
                 RunLiri(dataArr[i], dataArr[i + 1])
             }
         }
