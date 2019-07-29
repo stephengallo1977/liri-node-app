@@ -65,7 +65,7 @@ function getConcert(val) {
                 "Venue:\t\t" + apiResponse.data[i].venue.name,
                 "Location:\t" + location,
                 // format date with moment
-                "Date:\t\t" + apiResponse.data[i].datetime,
+                "Date:\t\t" + apiResponse.data[i].datetime,moment().format('MMMM Do YYYY, h:mm:ss a'),
                 "==========================================="
             ].join("\n");
             console.log(showData);
